@@ -811,6 +811,107 @@
       color: var(--tm-muted);
     }
 
+    /* ── EVENT POSTER + PROMO POPUP ── */
+    .event-poster {
+      display: block;
+      width: 100%;
+      height: auto;
+      border-radius: 12px;
+      border: 1px solid var(--tm-border);
+      margin-bottom: 1.4rem;
+    }
+
+    .promo-card {
+      background: white;
+      border-radius: 16px;
+      border-top: 6px solid var(--tm-maroon);
+      max-width: 460px;
+      width: 100%;
+      position: relative;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.4);
+      margin: auto;
+      overflow: hidden;
+    }
+
+    .promo-card img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .promo-body {
+      padding: 1.4rem 1.6rem 1.6rem;
+      text-align: center;
+    }
+
+    .promo-kicker {
+      font-family: var(--font-head);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--tm-maroon);
+      margin-bottom: 0.5rem;
+    }
+
+    .promo-when {
+      font-family: var(--font-head);
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--tm-blue);
+      line-height: 1.3;
+    }
+
+    .promo-where {
+      font-size: 14px;
+      color: var(--tm-muted);
+      margin-top: 4px;
+    }
+
+    .promo-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 1.2rem;
+    }
+
+    .promo-primary {
+      display: inline-block;
+      background: var(--tm-maroon);
+      color: white;
+      font-family: var(--font-head);
+      font-weight: 700;
+      font-size: 14px;
+      padding: 0.65rem 1.4rem;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+
+    .promo-primary:hover { background: var(--tm-maroon-deep); color: white; }
+
+    .promo-secondary {
+      display: inline-block;
+      background: transparent;
+      border: 1.5px solid var(--tm-border);
+      color: var(--tm-blue);
+      font-family: var(--font-head);
+      font-weight: 700;
+      font-size: 14px;
+      padding: 0.65rem 1.4rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    .promo-secondary:hover { border-color: var(--tm-blue); background: var(--tm-fair); }
+
+    @media (max-width: 600px) {
+      .promo-body { padding: 1.2rem 1.1rem 1.4rem; }
+      .promo-actions { flex-direction: column; }
+    }
+
     /* ── EVENT DETAILS MODAL ── */
     .event-more {
       display: inline-block;
@@ -1344,6 +1445,10 @@
        Edit the text here as ordinary HTML.
        ══════════════════════════════════════════════════ -->
   <template id="details-2026-10-04">
+    <img class="event-poster" src="assets/workshop-poster.jpg"
+         alt="Presentation Mastery Workshop — Where Technical Talent Learns to Be Heard"
+         onerror="this.style.display='none'" />
+
     <p class="lede">Great ideas don't always win — the best-communicated ones do.</p>
 
     <p>On Sunday, October 4th, Toastmasters District 95, Division G, is hosting a free
@@ -1375,6 +1480,32 @@
       <span class="modal-limited">Spots are limited.</span>
     </div>
   </template>
+
+  <!-- ══════════════════════════════════════════════════
+       PROMO POPUP — opens by itself on arrival, once per browsing
+       session, and stops appearing after PROMO_UNTIL below.
+       To retire it early, change PROMO_UNTIL to a past date.
+       ══════════════════════════════════════════════════ -->
+  <div class="modal-backdrop" id="promo-modal" role="dialog" aria-modal="true" aria-labelledby="promo-when">
+    <div class="promo-card">
+      <button type="button" class="modal-close" id="promo-close" aria-label="Close"
+              style="background: rgba(255,255,255,0.9);">&times;</button>
+      <img src="assets/workshop-poster.jpg"
+           alt="Presentation Mastery Workshop — Where Technical Talent Learns to Be Heard"
+           onerror="this.style.display='none'" />
+      <div class="promo-body">
+        <div class="promo-kicker" data-en="Free · Open to all" data-de="Kostenlos · Für alle offen">Free · Open to all</div>
+        <div class="promo-when" id="promo-when">Sunday, 4 October 2026 · 14:00–18:00</div>
+        <div class="promo-where">Salen, Union Kulturhus, Nørre Allé 7, København N</div>
+        <div class="promo-actions">
+          <a class="promo-primary" href="https://lnkd.in/eGuYamNb" target="_blank" rel="noopener"
+             data-en="Reserve your seat" data-de="Platz reservieren">Reserve your seat</a>
+          <button type="button" class="promo-secondary" id="promo-details"
+                  data-en="See details" data-de="Details ansehen">See details</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- EVENT DETAILS MODAL -->
   <div class="modal-backdrop" id="event-modal" role="dialog" aria-modal="true" aria-labelledby="event-modal-title">
@@ -1595,8 +1726,46 @@
     });
 
     document.addEventListener('keydown', function (ev) {
-      if (ev.key === 'Escape') closeEventModal();
+      if (ev.key !== 'Escape') return;
+      closeEventModal();
+      var promo = document.getElementById('promo-modal');
+      if (promo && promo.classList.contains('open')) closePromo();
     });
+
+    // ── Promo popup ──
+    // Shows on arrival, once per browsing session, until the end of this date.
+    var PROMO_UNTIL = '2026-10-04';
+    var PROMO_EVENT_INDEX = 0;
+
+    function closePromo() {
+      document.getElementById('promo-modal').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    (function () {
+      var until = parseDate(PROMO_UNTIL);
+      until.setHours(23, 59, 59, 999);
+      if (new Date() > until) return;                       // event has passed
+      try {
+        if (sessionStorage.getItem('tm-promo-seen')) return; // already shown this visit
+        sessionStorage.setItem('tm-promo-seen', 'yes');
+      } catch (e) { /* private mode — show it anyway */ }
+
+      var modal = document.getElementById('promo-modal');
+      if (!modal) return;
+
+      window.setTimeout(function () {
+        modal.classList.add('open');
+        document.body.style.overflow = 'hidden';
+      }, 900);
+
+      document.getElementById('promo-close').addEventListener('click', closePromo);
+      modal.addEventListener('click', function (ev) { if (ev.target === this) closePromo(); });
+      document.getElementById('promo-details').addEventListener('click', function () {
+        closePromo();
+        openEventModal(PROMO_EVENT_INDEX);
+      });
+    })();
 
     // Tap an event card → open its details, or fall back to jumping the calendar
     document.getElementById('event-list').addEventListener('click', function (ev) {
