@@ -71,6 +71,10 @@
       white-space: nowrap;
     }
 
+
+    .nav-brand a { color: inherit; text-decoration: none; transition: color 0.15s; }
+    .nav-brand a:hover { color: var(--tm-yellow); }
+    .nav-brand .brand-home { display: flex; align-items: center; }
     .nav-brand img { height: 32px; width: auto; }
     .nav-brand .divider { opacity: 0.45; font-weight: 400; margin: 0 2px; color: var(--tm-yellow); }
 
@@ -308,14 +312,16 @@
 
   <!-- NAV -->
   <nav id="top">
-    <a class="nav-brand" href="index.html">
-      <img src="assets/tm-logo.png"
-           onerror="this.style.display='none'"
-           alt="Toastmasters logo" />
-      District 95
+    <div class="nav-brand">
+      <a class="brand-home" href="index.html" aria-label="Division G home">
+        <img src="assets/tm-logo.png"
+             onerror="this.style.display='none'"
+             alt="Toastmasters logo" />
+      </a>
+      <a class="brand-link" href="https://toastmasters-95.org/" target="_blank" rel="noopener">District 95</a>
       <span class="divider">·</span>
-      Division G
-    </a>
+      <a class="brand-home" href="index.html">Division G</a>
+    </div>
     <button class="nav-toggle" id="nav-toggle" aria-label="Menu" aria-expanded="false" onclick="toggleNav()">
       <span></span><span></span><span></span>
     </button>
